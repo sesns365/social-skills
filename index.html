@@ -69,6 +69,11 @@ main{padding-block:32px 64px}
 .pill.ok{background:var(--green);color:var(--surface)}
 .pill.wip{background:var(--orange-soft);color:var(--orange)}
 .pill.plan{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-top:-16px}
+.filters button{font:inherit;font-size:15px;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--surface)}
+.filters button span{color:inherit;opacity:.7;font-size:13px;margin-left:4px}
+.ep .grp{position:absolute;top:14px;right:14px;font-size:12px;color:var(--muted)}
 
 /* 單集頁 */
 .back{font-size:15px}
@@ -141,7 +146,6 @@ footer .wrap{padding-block:20px;display:flex;flex-wrap:wrap;gap:8px 24px;justify
   <a class="brand" href="#home" data-go="home">社交小特工 <small>國小社會技巧教材包｜特工365</small></a>
   <nav aria-label="主選單">
     <a href="#home" data-go="home">集數總覽</a>
-    <a href="#ep1" data-go="ep1">第 1 集</a>
     <a href="#guide" data-go="guide">教師使用說明</a>
     <a href="#curriculum" data-go="curriculum">課綱對照</a>
   </nav>
@@ -171,8 +175,10 @@ footer .wrap{padding-block:20px;display:flex;flex-wrap:wrap;gap:8px 24px;justify
     <li><b>寫學習單</b><span>依推薦印 A、B 或 C 版，也可下載 docx 自行修改。</span></li>
   </ol>
 
-  <div class="sec-head"><h2>全部集數</h2><p>集數持續更新，依學生需求優先度排序。</p></div>
+  <div class="sec-head"><h2>全部集數</h2><p>集數持續更新</p></div>
+  <div class="filters" id="filters" role="group" aria-label="依技巧類別篩選"></div>
   <div class="eps" id="eps"></div>
+  <p class="note" id="empty" hidden>這個類別目前還沒有集數。</p>
 </section>
 
 <!-- 單集頁 -->
@@ -295,19 +301,33 @@ const EPS=[
  [9,"拒絕別人","說不要、說理由、找大人","xiaoma","plan","2-Ⅱ-5、2-Ⅰ-12","B-Ⅱ-4","同學一直要她借作業來抄"],
  [10,"道歉","說對不起、說錯哪、補一補","ahan","plan","2-Ⅰ-8、2-Ⅱ-4","B-Ⅰ-4","直接說同學的畫很醜，同學哭了"]];
 const PILL={ok:["可以使用","ok"],wip:["製作中","wip"],plan:["規劃中","plan"]};
-document.getElementById("eps").innerHTML=EPS.map(e=>{
+// 分組依課綱學習內容的主題軸：A 處己、B 處人、C 處環境
+const GROUPS={A:"情緒與自己",B:"與人互動",C:"學校與團體"};
+const grp=e=>e[6][0];
+let filter="all";
+function renderEps(){
+  const list=EPS.filter(e=>filter==="all"||grp(e)===filter);
+  document.getElementById("eps").innerHTML=list.map(e=>{
   const [n,t,m,c,s]=e, ready=s==="ok", tag=ready?"a":"div";
   return `<${tag} class="ep${ready?" ready":""}"${ready?` href="#ep${n}" data-go="ep${n}"`:""}>
-    <span class="no">第 ${n} 集</span><h3>${t}</h3><span class="motto">${m}</span>
+    <span class="no">第 ${n} 集・${GROUPS[grp(e)]}</span><h3>${t}</h3><span class="motto">${m}</span>
     <span class="pill ${PILL[s][1]}">${PILL[s][0]}</span>
     <img src="data:image/svg+xml;base64,${IMG[c]}" alt=""></${tag}>`}).join("");
+  document.getElementById("empty").hidden=list.length>0;
+  document.querySelectorAll("#filters button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.f===filter));
+}
+document.getElementById("filters").innerHTML=[["all","全部",EPS.length],...Object.entries(GROUPS).map(([k,v])=>[k,v,EPS.filter(e=>grp(e)===k).length])]
+  .map(([k,v,n])=>`<button type="button" data-f="${k}">${v}<span>${n}</span></button>`).join("");
+document.getElementById("filters").addEventListener("click",ev=>{const b=ev.target.closest("button");if(!b)return;filter=b.dataset.f;renderEps()});
+renderEps();
 document.getElementById("cur").innerHTML=EPS.map(e=>`<tr><td class="code">${e[0]}</td><td>${e[1]}${e[4]==="ok"?"":` <span class="s pill ${PILL[e[4]][1]}">${PILL[e[4]][0]}</span>`}</td><td>${e[2]}</td><td class="code">${e[5]}</td><td class="code">${e[6]}</td><td>${e[7]}</td></tr>`).join("");
 
 const VIEWS=["home","ep1","guide","curriculum"];
 function show(v){
   if(!VIEWS.includes(v))v="home";
   VIEWS.forEach(x=>document.getElementById("v-"+x).hidden=x!==v);
-  document.querySelectorAll("nav a").forEach(a=>{if(a.dataset.go===v)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
+  const navV=v.startsWith("ep")?"home":v;
+  document.querySelectorAll("nav a").forEach(a=>{if(a.dataset.go===navV)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
   window.scrollTo(0,0);
 }
 document.addEventListener("click",ev=>{
