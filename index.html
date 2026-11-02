@@ -829,19 +829,30 @@ const EPS=[
  [7,"看懂別人的表情","看臉、看動作、想一想","ahan","ok","2-Ⅱ-1、1-Ⅰ-1","B-Ⅱ-1","一直講恐龍，沒發現同學已經不耐煩"],
  [8,"有禮貌地提問","舉手、等待、問清楚","xiaoli","ok","3-Ⅰ-3、3-Ⅰ-5","C-Ⅰ-1","聽不懂作業，大聲打斷老師"],
  [9,"拒絕別人","說不要、說理由、找大人","xiaoma","ok","2-Ⅱ-5、2-Ⅰ-12","B-Ⅱ-4","同學一直要她借作業來抄"],
- [10,"道歉","說對不起、說錯哪、補一補","ahan","ok","2-Ⅰ-8、2-Ⅱ-4","B-Ⅰ-4","直接說同學的畫很醜，同學哭了"]];
-const PILL={ok:["可以使用","ok"],wip:["製作中","wip"],plan:["規劃中","plan"]};
+ [10,"道歉","說對不起、說錯哪、補一補","ahan","ok","2-Ⅰ-8、2-Ⅱ-4","B-Ⅰ-4","直接說同學的畫很醜，同學哭了"],
+ [11,"讚美別人","看優點、說具體、真心說","xiaoma","soon","2-Ⅰ-7、2-Ⅲ-1","C-Ⅱ-1","心裡覺得同學的作品很棒，卻低頭走開"],
+ [12,"更多具體讚美的方法","","ate","soon","","",""],
+ [13,"借東西","","xiaole","soon","","",""],
+ [14,"輸了也沒關係","","xiaoli","soon","","",""],
+ [15,"被取笑時怎麼辦","","xiaole","soon","","",""],
+ [16,"關心別人","","ahan","soon","","",""],
+ [17,"耐心等待","","xiaole","soon","","",""],
+ [18,"說出不同意見","","xiaoma","soon","","",""],
+ [19,"計畫改變了","","ahan","soon","","",""],
+ [20,"保持距離","","xiaoli","soon","","",""],
+ [21,"邀請別人一起玩","","xiaoma","soon","","",""]];
+const PILL={ok:["可以使用","ok"],soon:["即將開放","plan"],wip:["製作中","wip"],plan:["規劃中","plan"]};
 // 分組依課綱學習內容的主題軸：A 處己、B 處人、C 處環境
 const GROUPS={A:"處己",B:"處人",C:"處環境"};
 const HINT={A:"情緒與自己",B:"與人互動",C:"學校與團體"};
-const grp=e=>e[6][0];
+const grp=e=>e[6]?e[6][0]:"";
 let filter="all";
 function renderEps(){
   const list=EPS.filter(e=>filter==="all"||grp(e)===filter);
   document.getElementById("eps").innerHTML=list.map(e=>{
   const [n,t,m,c,s]=e, ready=s==="ok", tag=ready?"a":"div";
   return `<${tag} class="ep${ready?" ready":""}"${ready?` href="#ep${n}" data-go="ep${n}"`:""}>
-    <span class="no">第 ${n} 集・${GROUPS[grp(e)]}</span><h3>${t}</h3><span class="motto">${m}</span>
+    <span class="no">第 ${n} 集${grp(e)?"・"+GROUPS[grp(e)]:""}</span><h3>${t}</h3><span class="motto">${m||"口訣即將公布"}</span>
     <span class="pill ${PILL[s][1]}">${PILL[s][0]}</span>
     <img src="data:image/svg+xml;base64,${IMG[c]}" alt=""></${tag}>`}).join("");
   document.getElementById("empty").hidden=list.length>0;
@@ -851,7 +862,7 @@ document.getElementById("filters").innerHTML=[["all","全部",EPS.length],...Obj
   .map(([k,v,n])=>`<button type="button" data-f="${k}">${v}<span>${n}</span></button>`).join("");
 document.getElementById("filters").addEventListener("click",ev=>{const b=ev.target.closest("button");if(!b)return;filter=b.dataset.f;renderEps()});
 renderEps();
-document.getElementById("cur").innerHTML=EPS.map(e=>`<tr><td class="code">${e[0]}</td><td>${e[1]}${e[4]==="ok"?"":` <span class="s pill ${PILL[e[4]][1]}">${PILL[e[4]][0]}</span>`}</td><td>${e[2]}</td><td class="code">${e[5]}</td><td class="code">${e[6]}</td><td>${e[7]}</td></tr>`).join("");
+document.getElementById("cur").innerHTML=EPS.map(e=>`<tr><td class="code">${e[0]}</td><td>${e[1]}${e[4]==="ok"?"":` <span class="s pill ${PILL[e[4]][1]}">${PILL[e[4]][0]}</span>`}</td><td>${e[2]||"即將公布"}</td><td class="code">${e[5]||"—"}</td><td class="code">${e[6]||"—"}</td><td>${e[7]||"—"}</td></tr>`).join("");
 
 const VIEWS=["home","ep1","ep2","ep3","ep4","ep5","ep6","ep7","ep8","ep9","ep10","guide","curriculum"];
 function show(v){
