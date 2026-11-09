@@ -24,6 +24,11 @@ ep1/
 
 動畫 MP4 不放在這裡，改連 YouTube。
 
+## 連結格式
+
+- 單集頁：`https://sesns365.github.io/social-skills/#epN`（例如 `#ep17`，不是 `#v-ep17`）
+- 互動網頁：`https://sesns365.github.io/social-skills/epN/interactive.html`
+
 ## 新增一集的步驟
 
 1. 建立 `epN/` 資料夾，放入 `interactive.html`、`worksheet-A/B/C.pdf`、`worksheet-A/B/C.docx`，有教學指引再放 `guide.pdf`，有選配材料再放 `poster.pdf`、`cards.pdf`、`record.pdf`。
